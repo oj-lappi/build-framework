@@ -1,0 +1,8 @@
+#!/bin/sh
+
+show_usage(){
+	script=$(basename $0)
+	printf "\nusage: $script "
+}
+
+
