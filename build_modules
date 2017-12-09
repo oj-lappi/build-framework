@@ -1,0 +1,19 @@
+#!/bin/sh
+
+show_usage(){
+	script=$(basename $0)
+	printf "\nusage: $script repo[#branch] [ repo2#branch ... ] \n\n loads branches as submodules to this project\n"
+	exit 1
+}
+if [ $# -lt 1 ];then
+	show_usage
+else
+	re='/\(git@.\+\):\(.*\)\(#.*\)/'
+	re1='s'$re'\1/p'	
+	re2='s'$re'\2/p'	
+	re3='s'$re'\3/p'	
+	address=$(printf "$1" | sed -n $re1)
+	repo=$(printf "$1" | sed -n $re2)
+	branch=$(printf "$1" | sed -n $re3)
+	printf "$address\n"
+fi
