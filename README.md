@@ -1,4 +1,4 @@
-build framework using git sh client
+build tools
 ===================================
 
 ## worklist
