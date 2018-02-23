@@ -1,0 +1,19 @@
+#!/bin/python
+import sys,json
+repos = json.load(sys.stdin)
+repo_dict=dict(map(lambda repo:(repo["name"],repo),repos))
+tty=open('/dev/tty','w')
+tty.write("\n")
+tty.write("repos:")
+tty.write("\n")
+for repo in repos:
+    tty.write("\n")
+    tty.write(repo["name"])
+
+
+sys.stdin = open ('/dev/tty', 'r')
+tty.write("\n\n")
+tty.write("choose repo:")
+tty.write("\n\n")
+print(repo_dict[input()]["ssh_url"])
+

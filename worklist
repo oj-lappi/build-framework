@@ -1,0 +1,8 @@
+#!/bin/sh
+#get_config(){
+#ead config somehow, for now just hardcoded
+#}
+user=oj-lappi
+endpoint=https://api.github.com
+ssh_url=$(curl $endpoint/users/$user/repos|choose_repo)
+git clone $ssh_url
