@@ -1,8 +1,14 @@
 #!/bin/sh
-#get_config(){
-#ead config somehow, for now just hardcoded
-#}
-user=oj-lappi
+_type=$(python -c "import sys,json;print(json.load(open('./worklist.conf','r'))['default']['type'])")
+
+
+if [ "$_type" = "github" ] 
+then
 endpoint=https://api.github.com
+user=$(python -c "import sys,json;print(json.load(open('./worklist.conf','r'))['default']['user'])")
+elif [ "$_type" = "gitlab" ]
+then
+endpoint=$(python -c "import sys,json;print(json.load(open('./worklist.conf','r'))['default']['url'])")
+fi
 ssh_url=$(curl $endpoint/users/$user/repos|choose_repo)
 git clone $ssh_url
