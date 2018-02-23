@@ -2,7 +2,7 @@ build tools
 ===================================
 
 ## worklist
-if .reporc=`"default":{"type":"github","user":"oj-lappi"}`
+if worklist.conf=`{default":{"type":"github","user":"oj-lappi"}}`
 get list of repositories: for user oj-lappi from default github url
 
 ## worklist -t=github -a -u=oj-lappi
