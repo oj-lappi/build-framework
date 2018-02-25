@@ -3,16 +3,14 @@ build tools
 
 ## worklist
 if worklist.conf=`{default":{"type":"github","user":"oj-lappi"}}`
-get list of repositories: for user oj-lappi from default github url
+get list of repositories: for user oj-lappi from github.com
 
-## worklist -t=github -a -u=oj-lappi
-get list of repository addresses to start working on from default github url
+## worklist -t github -u oj-lappi
+get list of repository addresses to start working on from github.com
 
-## worklist -t=github -n --cached -u=oj-lappi
+## Future syntax
+## worklist -t=github --cached -u=oj-lappi
 get list of repository names from local cachefile
-
-### worklist-github, worklist-gitlab, worklist-bitbucket
-connectors/drivers/whatever you call it. They do the dirtywork. Can also be called directly.
 
 ### build-git-tree
 auto build project into commits with timestamps and add header to commit messages including test data and commit hash for validation.

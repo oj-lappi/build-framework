@@ -1,0 +1,17 @@
+#!/bin/bash
+files_listed="$(ls)"
+git clone $1
+files_after="$(ls)"
+#compare and list changed files in local folder
+repo="$(comm -13 <(printf "$files_listed") <(printf "$files_after") )"
+cd $repo
+repo_path="$(pwd)"
+
+
+while read binary
+do
+bin_curr=$repo_path/$binary
+printf "$bin_curr"
+# link to this file in /usr/local/bin (assuming /usr/local/bin/ is already in PATH)
+sudo ln -s $bin_curr /usr/local/bin/$binary
+done < .bin_list #all files that get added configured in .bin_list as newline separated file
