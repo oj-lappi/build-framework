@@ -1,14 +1,113 @@
-#!/bin/sh
-_type=$(python -c "import sys,json;print(json.load(open('./worklist.conf','r'))['default']['type'])")
+#!/bin/python
+import sys,re,json,requests
+from itertools import tee
+
+def _add_opts(regex,option_dict,offset):
+    options=filter(regex.match,sys.argv)
+
+    a_n = len(sys.argv)
+    options,list_options=tee(options)
+    list_options=list(list_options)
+    for option in options:
+        i =sys.argv.index(option)+1
+        if len(sys.argv) == i:
+            break
+        option_dict[option[offset:]]=sys.argv[i]
 
 
-if [ "$_type" = "github" ] 
-then
-endpoint=https://api.github.com
-user=$(python -c "import sys,json;print(json.load(open('./worklist.conf','r'))['default']['user'])")
-elif [ "$_type" = "gitlab" ]
-then
-endpoint=$(python -c "import sys,json;print(json.load(open('./worklist.conf','r'))['default']['url'])")
-fi
-ssh_url=$(curl $endpoint/users/$user/repos|choose_repo)
-git clone $ssh_url
+def get_options(short_alias):
+    option_dict={}
+    short_dict={}
+    short_re=re.compile("-[^-]+")
+    long_re=re.compile("--w+")
+    _add_opts(short_re,short_dict,1)
+    _add_opts(long_re,option_dict,2)
+    for key in short_dict:
+        option_dict[short_alias[key]]=short_dict[key]
+    return option_dict
+
+short_alias={ 
+        'p' : 'profile',
+        't' : 'type',
+        'u' : 'user'
+        }
+
+#read parameters from config file and argv
+_config=json.load(open('./worklist.conf','r'))
+options=get_options(short_alias)
+
+#TODO check that combination of configs makes sense
+
+def github(params):
+    endpoint="https://api.github.com"
+    if 'user' in params:
+        endpoint+="/users/"+params["user"]+"/repos"
+    r=requests.get(endpoint)
+    tty=open('/dev/tty','w')
+    for repo in r.json():
+        tty.write(repo["name"])
+        tty.write('\n')
+    return r.json()
+
+def gitlab(params):
+    endpoint=params["endpoint"]
+    r.requests.get(endpoint+"/projects")
+    tty=open('/dev/tty','w')
+    for repo in r.json():
+        tty.write(repo["name"])
+        tty.write('\n')
+    return r.json()
+
+def bitbucket(params):
+    print("not supported yet")
+
+def read_generic(params,repo,key):
+    generic_api={
+        'name':{
+            'github':'name',
+            'gitlab':'name',
+            'bitbucket':'not supported'
+        },        
+        'ssh_url':{
+            'github':'ssh_url',
+            'gitlab':'ssh_url_to_repo',
+            'bitbucket':'not supported'
+        }
+    }
+#TODO check all keys are in dict, otherwise print error not supported
+    return repo[generic_api[key][params["type"]]]
+
+api={
+        "github":github,
+        "gitlab":gitlab,
+        "bitbucket":bitbucket
+}
+
+
+if 'profile' in options:
+    config=_config[options["profile"]]
+elif 'default' in _config:
+    config=_config["default"]
+
+if config is None:
+    config = {}
+
+for key in options:
+    #overwrite config with argv
+    config[key]=options[key]
+
+if 'type' not in config:
+    print("no api selected")
+elif config['type'] in api:
+    repos=api[config['type']](config)
+    repos_by_name=dict(map(lambda repo:(repo['name'],repo),repos))
+    tty=open('/dev/tty','w')
+    tty.write("\n")
+    tty.write("select repo")
+    tty.write("\n")
+    index=input()
+    if index.isdigit():
+        print(read_generic(config,repos[int(index)],'ssh_url'))
+    else:
+        print(read_generic(config,repos_by_name[index],'ssh_url'))
+
