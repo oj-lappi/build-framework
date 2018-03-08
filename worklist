@@ -2,6 +2,20 @@
 import sys,re,json,requests
 from itertools import tee
 
+local_config_path="./worklist.conf"
+user_config_path="~/.worklist.conf"
+
+errors={
+        "config":"missing config value(s): {}",
+        "connection":"connection to {} cannot be established",
+        "feature":"feature {} not supported yet"
+        }
+
+def display_error(msg,msg_var):
+    tty=open('/dev/tty','w')
+    tty.write(msg.format(msg_var)
+    tty.write('\n')
+
 def _add_opts(regex,option_dict,offset):
     options=filter(regex.match,sys.argv)
 
@@ -33,8 +47,13 @@ short_alias={
         }
 
 #read parameters from config file and argv
-_config=json.load(open('./worklist.conf','r'))
+if os.path.isfile(local_config_path):
+    _config=json.load(open(local_config_path,'r'))
+elif os.path.isfile(user_config_path):
+    _config=json.load(open(user_config_path,'r'))
+
 options=get_options(short_alias)
+
 
 #TODO check that combination of configs makes sense
 
@@ -47,6 +66,7 @@ def github(params):
     for repo in r.json():
         tty.write(repo["name"])
         tty.write('\n')
+    tty.close()
     return r.json()
 
 def gitlab(params):
@@ -56,6 +76,7 @@ def gitlab(params):
     for repo in r.json():
         tty.write(repo["name"])
         tty.write('\n')
+    tty.close()
     return r.json()
 
 def bitbucket(params):
